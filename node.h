@@ -23,7 +23,7 @@ public:
     delete left;
     delete right;
   }
-  void traverse(int* table, uint8_t progress);
+  void traverse( uint8_t progress);
 };
 
 class compareNode {
@@ -33,7 +33,5 @@ public:
     return n1->freq > n2->freq;
   }
 };
-
-int *getCodeTable(Node* root);
 
 Node *merge(Node *leftChild, Node *rightChild);

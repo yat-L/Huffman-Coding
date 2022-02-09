@@ -1,27 +1,28 @@
 #include "node.h"
+#include <algorithm>
+#include <cstdint>
+#define SIZE 256
 
-void Node::traverse(int *table, uint8_t progress) {
+uint8_t *codewordTable = new uint8_t[SIZE];
+unsigned char* x = std::fill_n(codewordTable, SIZE, 1);
+
+void Node::traverse( uint8_t progress) {
   if (left == NULL && right == NULL) {
-    table[symbol] = progress;
+    codewordTable[symbol] = progress;
   }
 
   uint8_t goLeft = (progress << 1) | 1;
   uint8_t goRight = progress << 1;
 
   if (left != NULL) {
-    left->traverse(table, goLeft);
+    left->traverse( goLeft);
   }
   if (right != NULL) {
-    right->traverse(table, goRight);
+    right->traverse( goRight);
   }
 }
 
-int *getCodeTable(Node *root) {
-  int *codewordTable = new int[4];
-  root->traverse(codewordTable, 0);
 
-  return codewordTable;
-}
 
 Node *merge(Node *leftChild, Node *rightChild) {
   Node *result =
@@ -41,8 +42,8 @@ int main() {
   Node *BCD = merge(testB, CD);
   Node *ABCD = merge(BCD, testA);
 
-  int *result = getCodeTable(ABCD);
-  for(int i = 0 ; i < 4 ; i++){
-    cout << std::bitset<8>(result[i]) << endl;
+  ABCD->traverse(0);
+  for(int i = 0 ; i < 255 ; i++){
+    cout << std::bitset<8>(codewordTable[i]) << endl;
   }
 }
