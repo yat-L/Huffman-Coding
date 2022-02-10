@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <sys/types.h>
 #define SIZE 256
+#define BYTE_SIZE 8
 
 uint8_t *codewordTable = new uint8_t[SIZE];
 unsigned char *x = std::fill_n(codewordTable, SIZE, 1);
@@ -28,7 +29,7 @@ void Node::traverse(uint8_t progress) {
 
 uint8_t traverse_de(Node *root, uint8_t byte) {
   static Node *currentPtr = root;
-  int count = 8;
+  int count = BYTE_SIZE;
   while (count >0 && numberofSymbol > 0 ) {
     uint8_t lsb = byte & 1;
     byte = byte >> 1;
