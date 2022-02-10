@@ -1,6 +1,5 @@
 #include "node.h"
 #include <algorithm>
-#include <bits/types/FILE.h>
 #include <cstdint>
 #include <cstdio>
 #include <sys/types.h>
