@@ -23,15 +23,20 @@ public:
     delete left;
     delete right;
   }
-  void traverse( uint8_t progress);
+
+  void traverse(uint8_t progress, uint8_t* table);
+
 };
 
-class compareNode {
-public:
-  bool operator()(const Node *n1, const Node *n2) {
+  class compareNode {
+  public:
+    bool operator()(const Node *n1, const Node *n2) {
 
-    return n1->freq > n2->freq;
-  }
+      return n1->freq > n2->freq;
+    }
 };
 
 Node *merge(Node *leftChild, Node *rightChild);
+
+
+uint8_t traverse_de(Node *root, uint8_t byte, int numberofSymbol);

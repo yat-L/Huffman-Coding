@@ -6,30 +6,28 @@
 #define SIZE 256
 #define BYTE_SIZE 8
 
-uint8_t *codewordTable = new uint8_t[SIZE];
-unsigned char *x = std::fill_n(codewordTable, SIZE, 1);
-int numberofSymbol = 7;
 
-void Node::traverse(uint8_t progress) {
+void Node::traverse(uint8_t progress, uint8_t* table) {
   if (left == NULL && right == NULL) {
-    codewordTable[symbol] = progress;
+    table[symbol] = progress;
   }
 
   uint8_t goLeft = (progress << 1) | 1;
   uint8_t goRight = (progress << 1) | 0;
 
   if (left != NULL) {
-    left->traverse(goLeft);
+    left->traverse(goLeft,table);
   }
   if (right != NULL) {
-    right->traverse(goRight);
+    right->traverse(goRight,table);
   }
 }
 
-uint8_t traverse_de(Node *root, uint8_t byte) {
+uint8_t traverse_de(Node *root, uint8_t byte, int numberofSymbol) {
   static Node *currentPtr = root;
+  static int remainingSymbol = numberofSymbol;
   int count = BYTE_SIZE;
-  while (count >0 && numberofSymbol > 0 ) {
+  while (count >0 && remainingSymbol > 0 ) {
     uint8_t lsb = byte & 1;
     byte = byte >> 1;
     if (lsb == 0) {
@@ -39,7 +37,7 @@ uint8_t traverse_de(Node *root, uint8_t byte) {
     }
     if (currentPtr->left == NULL && currentPtr->right == NULL) {
       cout << unsigned(currentPtr->symbol) << endl;
-      numberofSymbol --;
+      remainingSymbol --;
       currentPtr = root;
     }
     count --;
@@ -53,24 +51,3 @@ Node *merge(Node *leftChild, Node *rightChild) {
   return result;
 }
 
-int main() {
-  /////////////////////
-  priority_queue<Node *, vector<Node *>, compareNode> Q;
-  //////////////////////
-  Node *testA = new Node(6, 0, NULL, NULL);
-  Node *testB = new Node(2, 1, NULL, NULL);
-  Node *testC = new Node(2, 2, NULL, NULL);
-  Node *testD = new Node(1, 3, NULL, NULL);
-  Node *CD = merge(testD, testC);
-  Node *BCD = merge(testB, CD);
-  Node *ABCD = merge(BCD, testA);
-
-  ABCD->traverse(0);
-  for (int i = 0; i < 255; i++) {
-    cout << std::bitset<8>(codewordTable[i]) << endl;
-  }
-  uint8_t testByte1 = 254;
-  uint8_t testByte2 = 5;
-  traverse_de(ABCD, testByte1);
-  traverse_de(ABCD, testByte2);
-}

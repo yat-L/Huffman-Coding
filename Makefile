@@ -1,4 +1,6 @@
-main:
-	clang++ -Wall -o run.exe node.cpp && ./run.exe
+all:
+	clang++ -Wall static.cpp node.cpp -o run.exe && ./run.exe
+
+
 clean:
 	rm *.exe
