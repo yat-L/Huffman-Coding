@@ -23,9 +23,10 @@ void Node::traverse(uint8_t progress, uint8_t* table) {
   }
 }
 
-uint8_t traverse_de(Node *root, uint8_t byte, int numberofSymbol) {
+uint8_t traverse_de(Node *root, uint8_t byte, int numberofSymbol, uint8_t* result) {
   static Node *currentPtr = root;
   static int remainingSymbol = numberofSymbol;
+  int indexInResult = 0;
   int count = BYTE_SIZE;
   while (count >0 && remainingSymbol > 0 ) {
     uint8_t lsb = byte & 1;
@@ -36,7 +37,9 @@ uint8_t traverse_de(Node *root, uint8_t byte, int numberofSymbol) {
       currentPtr = currentPtr->left;
     }
     if (currentPtr->left == NULL && currentPtr->right == NULL) {
-      cout << unsigned(currentPtr->symbol) << endl;
+      result[indexInResult] = currentPtr->symbol;
+      //cout << unsigned(currentPtr->symbol) << endl;
+      indexInResult ++;
       remainingSymbol --;
       currentPtr = root;
     }

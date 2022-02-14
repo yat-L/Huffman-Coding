@@ -1,4 +1,5 @@
 #include "node.h"
+#include <cstdint>
 #define SIZE 256
 
 
@@ -27,6 +28,14 @@ int main() {
 
   uint8_t testByte1 = 254;
   uint8_t testByte2 = 5;
-  traverse_de(ABCD, testByte1, 7);
-  traverse_de(ABCD, testByte2, 7);
+  uint8_t* result1 = new uint8_t[8];
+  uint8_t *result2 = new uint8_t[8];
+  traverse_de(ABCD, testByte1, 7, result1);
+  traverse_de(ABCD, testByte2, 7, result2);
+  for( int i = 0 ; i < 8 ; i++){
+    cout << unsigned(result1[i]) << endl;
+  }
+  for (int i = 0; i < 8; i++) {
+    cout << unsigned(result2[i]) << endl;
+  }
 }
