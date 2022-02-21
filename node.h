@@ -39,4 +39,4 @@ public:
 Node *merge(Node *leftChild, Node *rightChild);
 
 
-uint8_t traverse_de(Node *root, uint8_t byte, int numberofSymbol, uint8_t* result);
+std::vector<uint8_t> traverse_de(Node *root, uint8_t byte, int numberofSymbol);
