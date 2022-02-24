@@ -1,61 +1,156 @@
 #include "node.h"
-#include <assert.h>
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
+#include <string>
 #include <vector>
 #define SIZE 256
 
 Node *buildingTree(int *);
-void init(int *);
-void writeFile(uint8_t, int, FILE*);
+void init(int *, string);
+void writeFile(uint8_t, int, FILE *);
 int coutBits(uint8_t);
+void compress(string,string);
+void writeMeta(FILE *fp, int *freqTable, int totalSymbol, int appearedSymbol);
+void decompress(string, string);
+void fileError(FILE* fp,string filename);
 
-int main() {
-  cout << "Static main" << endl;
-  /////////////////////
-  // priority_queue<Node *, vector<Node *>, compareNode> priQ;
-  uint8_t *codewordTable = new uint8_t[SIZE];
-  unsigned char *x = std::fill_n(codewordTable, SIZE, 1);
+int main(int argc, char** argv) {
+  if( argc < 4){
+    cout << "Please provide command." << endl;
+    return 1;
+  }
+  if( *argv[1] == 'c'){
+    compress(argv[2],argv[3]);
+    return 0;
+  }
+  if (*argv[1] == 'd') {
+    decompress(argv[2], argv[3]);
+    return 0;
+  }
+  else {
+    cout << "Wrong Command." << endl;
+    return 1;
+  }
+
+}
+
+void decompress(string inputFileName, string outputFileName){
+  cout << "Decompressing file " << inputFileName << endl << endl;
+  cout << "Alphabatic Frequencies:" << endl;
+
+  FILE* fpI = fopen(inputFileName.c_str(), "rb");
+  fileError(fpI, inputFileName);
+
   int *freqTable = new int[SIZE];
-  //////////////////////
-  init(freqTable);
-  Node *root = buildingTree(freqTable);
-  root->traverse(0, codewordTable);
+  std::fill_n(freqTable, SIZE, 0);
+  int totalSybol = 0;
+  int appearedSybol = 0;
 
-  // Node *testA = new Node(6, 0, NULL, NULL);
-  // Node *testB = new Node(2, 1, NULL, NULL);
-  // Node *testC = new Node(2, 2, NULL, NULL);
-  // Node *testD = new Node(1, 3, NULL, NULL);
-  // Node *CD = merge(testD, testC);
-  // Node *BCD = merge(testB, CD);
-  // Node *ABCD = merge(BCD, testA);
-
-  //  ABCD->traverse(0, codewordTable);
-  for (int i = 0; i < 255; i++) {
-    if (codewordTable[i] != 1) {
-      cout << i << ": " << std::bitset<8>(codewordTable[i]) << endl;
-      cout << i << ": " << coutBits(codewordTable[i]) << endl;
+  fread(&totalSybol, sizeof(int), 1, fpI);
+  fread(&appearedSybol, sizeof(int), 1, fpI);
+  //cout << "Decompress total: " << totalSybol << endl;
+  //cout << "Decompress appeared: " << appearedSybol << endl;
+  for(int i = 0 ; i < appearedSybol ; i++){
+    uint8_t tempSymbol = 0;
+    int tempFreq = 0;
+    fread(&tempSymbol, sizeof(uint8_t), 1, fpI);
+    fread(&tempFreq, sizeof(int), 1, fpI);
+    freqTable[tempSymbol] = tempFreq;
+  }
+  for(int i = 0 ; i < SIZE ; i++){
+    if (freqTable[i] != 0) {
+      cout << i << ": " << freqTable[i] << endl;
     }
   }
 
-  FILE *fp = fopen("test.txt.huff", "wb");
-  assert(fp);
+  Node *root = buildingTree(freqTable);
 
-  writeFile(codewordTable[97],7, fp);
-  writeFile(codewordTable[98], 7, fp);
-  writeFile(codewordTable[99], 7, fp);
-  writeFile(codewordTable[97], 7, fp);
-  writeFile(codewordTable[97], 7, fp);
-  writeFile(codewordTable[97], 7, fp);
-  writeFile(codewordTable[10], 7, fp);
+  //string newFileName = inputFileName.replace(inputFileName.size()-4,4,"puff");
+  FILE *fpO = fopen(outputFileName.c_str(), "wb");
 
-  // uint8_t testByte1 = 254;
-  // uint8_t testByte2 = 5;
-  // std::vector<uint8_t> test1 = traverse_de(ABCD, testByte1, 7);
-  // std::vector<uint8_t> test2 = traverse_de(ABCD, testByte2, 7);
+  uint8_t currentByte = 0;
+  while (fread(&currentByte, sizeof(uint8_t), 1, fpI) == 1) {
+    std::vector<uint8_t> resultingBytes = traverse_de(root, currentByte, totalSybol);
+    for(uint8_t i : resultingBytes){
+      fwrite(&i, sizeof(uint8_t), 1, fpO);
+    }
+  }
+
+  fclose(fpI);
+  fclose(fpO);
+  cout << "Decompression completed.Result is stored in file " << outputFileName << endl;
 }
 
-void writeFile(uint8_t codeword, int maxSymbol, FILE* fp) {
+void compress(string inputFileName, string outputFileName) {
+  cout << "Compressing file " << inputFileName << endl << endl;
+  cout << "Alphabatic Frequencies:" << endl;
+  uint8_t *codewordTable = new uint8_t[SIZE];
+  std::fill_n(codewordTable, SIZE, 1);
+  int *freqTable = new int[SIZE];
+  int totalSybol = 0;
+  float averageLength = 0;
+  int appearedSymbol = 0;
+
+  init(freqTable, inputFileName);
+
+  for (int i = 0; i < SIZE; i++) {
+    if (freqTable[i] != 0) {
+      totalSybol += freqTable[i];
+      appearedSymbol++;
+      cout << i << ": " << freqTable[i] << endl;
+    }
+  }
+  Node *root = buildingTree(freqTable);
+  root->traverse(0, codewordTable);
+
+  cout << "\nSymbol and their codewords: " << endl;
+  for (int i = 0; i < SIZE; i++) {
+    if (codewordTable[i] != 1) {
+      cout << "symbol:" << i << ", code:" << std::bitset<8>(codewordTable[i])
+           << endl;
+      averageLength += ((float)freqTable[i] / (float)totalSybol) *
+                       coutBits(codewordTable[i]);
+    }
+  }
+
+  printf("\nAverage codeword length is %.2f bits.\n", averageLength);
+
+  //string outputName = fileName + ".huff";
+
+  FILE *fpO = fopen(outputFileName.c_str(), "wb");
+  fileError(fpO, outputFileName);
+  FILE *fpI = fopen(inputFileName.c_str(), "rb");
+  fileError(fpI, inputFileName);
+
+  writeMeta(fpO, freqTable, totalSybol, appearedSymbol);
+
+  int c = fgetc(fpI);
+  while (c != EOF) {
+    writeFile(codewordTable[c], totalSybol, fpO);
+    c = fgetc(fpI);
+  }
+
+  fclose(fpI);
+  fclose(fpO);
+
+  cout << "Compression completed. Result is stored in file " << outputFileName
+       << endl;
+}
+
+void writeMeta(FILE *fp, int *freqTable, int totalSymbol, int appearedSymbol) {
+  fwrite(&totalSymbol, sizeof(int),1, fp);  // write total number of symbol
+  fwrite(&appearedSymbol, sizeof(int), 1, fp); // write total number of symbol
+  for(int i = 0 ; i < SIZE ; i++){
+    if (freqTable[i] != 0){
+      uint8_t sybol = i;
+      fwrite(&sybol, sizeof(uint8_t), 1,fp);
+      fwrite(&freqTable[i], sizeof(int), 1, fp);
+    }
+  }
+}
+
+void writeFile(uint8_t codeword, int maxSymbol, FILE *fp) {
   static uint8_t buffer = 0;
   static int pos = 0;
   static int count = maxSymbol;
@@ -81,19 +176,19 @@ void writeFile(uint8_t codeword, int maxSymbol, FILE* fp) {
   }
 
   count--;
-  if(count == 0){
-    //cout << "last byte" << endl;
+  if (count == 0) {
+    // cout << "last byte" << endl;
     fputc(buffer, fp);
   }
 
-  //cout << "buffer after each write: " << std::bitset<8>(buffer) << endl;
-  //cout << "pos: " << pos << endl;
-  //cout << "count: " << count << endl;
+  // cout << "buffer after each write: " << std::bitset<8>(buffer) << endl;
+  // cout << "pos: " << pos << endl;
+  // cout << "count: " << count << endl;
 }
 
 int coutBits(uint8_t i) {
   int result;
-  if(i == 0){
+  if (i == 0) {
     return 1;
   }
   for (result = 0; i > 0; result++) {
@@ -101,15 +196,15 @@ int coutBits(uint8_t i) {
   }
   return result;
 }
-void init(int *freq) {
-  FILE *fp = fopen("test.txt", "rb");
-  assert(fp);
+void init(int *freq, string fileName) {
+  FILE *fp = fopen(fileName.c_str(), "rb");
+  fileError(fp, fileName);
   int c = fgetc(fp);
   while (c != EOF) {
-    printf("%d \n", c);
     freq[c]++;
     c = fgetc(fp);
   }
+  fclose(fp);
 }
 
 Node *buildingTree(int *freq) {
@@ -132,4 +227,11 @@ Node *buildingTree(int *freq) {
   result = priQ.top();
 
   return result;
+}
+
+void fileError(FILE* fp, string filename){
+  if (fp == NULL) {
+    cout << "Cannot open file: " << filename << endl;
+    exit(1);
+  }
 }
