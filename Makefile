@@ -1,5 +1,5 @@
 all:
-	clang++ -Wall static.cpp node.cpp -o A1Q1-Lui-H
+	clang++ -Wall -g static.cpp node.cpp -o A1Q1-Lui-H
 
 
 clean:
