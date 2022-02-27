@@ -27,5 +27,6 @@ public:
   }
 };
 
-Node *expandNYT(Node *nyt);
+vector<Node *> expandNYT(Node *nyt, uint8_t symbol, vector<Node *> &symbolList,
+                         vector<Node *> &numberList);
 void swap(Node *, Node *);
