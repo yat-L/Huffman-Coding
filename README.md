@@ -8,3 +8,4 @@
 * For Adaptive Huffman Coding Q2:
 * **"./A1Q2-Lui-H c inputFile compressedFile"** to compress inputFile into compressedFile.
 * **"./A1Q2-Lui-H d compressedFile decompressedFile"** to compress compressedFile into decompressedFile.
+* execute **'make clean'** to delete teh executable
