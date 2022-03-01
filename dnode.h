@@ -7,14 +7,15 @@ using namespace std;
 class Node { // node class
 public:
   int freq; // freqeunce of the symbol in file
-  int number;
+  int number; // number of node
   uint8_t symbol; // symbol in 8 bits
-  Node *left;
-  Node *right;
-  Node *parent;
-  Node(int freqI, uint8_t symbolI, int number, Node *leftI, Node *rightI,
+  Node *left;  // left child
+  Node *right; // right child
+  Node *parent;  // parent node
+  Node(int freqI, uint8_t symbolI, int numberI, Node *leftI, Node *rightI,
        Node *parentI) {
     freq = freqI;
+    number = numberI;
     symbol = symbolI;
     left = leftI;
     right = rightI;
