@@ -1,3 +1,8 @@
+/*****************************************************
+COMP4160 Assignment 1
+Student Name: Ho Yat Lui
+Student Number: 7780269
+ *****************************************************/
 #include "dnode.h"
 #include <cstdint>
 #include <vector>
